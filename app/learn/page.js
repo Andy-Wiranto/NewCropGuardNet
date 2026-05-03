@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { Calendar, AlertTriangle, Leaf } from "lucide-react";
+import Image from "next/image";
+import { Calendar, Leaf } from "lucide-react";
+import SectionTitle from "@/components/shared/SectionTitle";
+import DiseaseCard from "@/components/features/learn/DiseaseCard";
+import TipCard from "@/components/shared/TipCard";
+import FadeIn from "@/components/shared/FadeIn";
+import Navbar from "@/components/Navbar";
 
 export const metadata = {
     title: "Learn More - PlantHealth",
@@ -8,216 +14,188 @@ export const metadata = {
 
 export default function LearnMore() {
     return (
-        <div className="min-h-screen bg-[#c7d8cf]">
-
-            {/* Navbar */}
-            <nav className="bg-white shadow-sm py-4 px-6 flex justify-between items-center">
-                <Link href="/">
-                    <div className="flex items-center gap-2">
-                        <Leaf className="text-green-600" />
-                        <span className="font-semibold text-gray-800">PlantHealth</span>
-                    </div>
-                </Link>
-                <Link href="/" className="text-gray-600 hover:text-green-600">
-                    Home
-                </Link>
-            </nav>
+        <main className="min-h-screen bg-[#c7d8cf]">
+            <Navbar />
 
             {/* Main Content */}
-            <div className="max-w-4xl mx-auto px-6 py-12">
+            <article className="max-w-4xl mx-auto px-6 py-12 md:py-20">
+                
+                <FadeIn delay={0.1}>
+                    {/* Date */}
+                    <div className="flex items-center gap-2 bg-green-100 text-green-800 px-4 py-1.5 rounded-full w-fit text-sm font-medium mb-6 shadow-sm">
+                        <Calendar size={16} aria-hidden="true" />
+                        <time dateTime="2026-02-09">February 9, 2026</time>
+                    </div>
 
-                {/* Date */}
-                <div className="flex items-center gap-2 bg-green-100 text-green-700 px-4 py-1 rounded-full w-fit text-sm mb-6">
-                    <Calendar size={16} />
-                    February 9, 2026
-                </div>
+                    {/* Title */}
+                    <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6 leading-tight tracking-tight">
+                        Complete Guide to Potato &amp; Tomato Plant Health
+                    </h1>
 
-                {/* Title */}
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-                    Complete Guide to Potato &amp; Tomato Plant Health
-                </h1>
-
-                <p className="text-gray-700 text-lg mb-10">
-                    Learn how to identify, prevent, and treat common diseases affecting your potato and tomato plants with expert tips and AI-powered detection.
-                </p>
+                    <p className="text-gray-700 text-lg md:text-xl mb-10 leading-relaxed">
+                        Learn how to identify, prevent, and treat common diseases affecting your potato and tomato plants with expert tips and AI-powered detection.
+                    </p>
+                </FadeIn>
 
                 {/* Hero Image */}
-                <img
-                    src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6"
-                    alt="Farm"
-                    className="rounded-2xl mb-12 w-full h-[400px] object-cover"
-                />
-
-                {/* Why It Matters */}
-                <div className="bg-white rounded-2xl p-8 shadow-sm mb-12">
-                    <h2 className="text-2xl font-semibold mb-4">
-                        Why Plant Health Matters
-                    </h2>
-                    <p className="text-gray-700 mb-4">
-                        Potato and tomato plants are among the most popular crops for home gardeners and commercial farmers alike. However, they&apos;re also susceptible to various diseases that can devastate your harvest if not detected early.
-                    </p>
-                    <p className="text-gray-700">
-                        With the advancement of AI technology, detecting plant diseases has become faster and more accessible than ever.
-                    </p>
-                </div>
-
-                {/* Potato Section */}
-                <SectionTitle emoji="🥔" title="Potato Plant Diseases" />
-
-                <DiseaseCard
-                    title="Late Blight"
-                    description="Late blight is one of the most destructive diseases affecting potato plants."
-                    symptoms={[
-                        "Dark brown or black spots on leaves",
-                        "White fungal growth on undersides",
-                        "Rapid wilting and decay"
-                    ]}
-                    treatment={[
-                        "Apply copper-based fungicides",
-                        "Remove infected material",
-                        "Improve air circulation"
-                    ]}
-                />
-
-                <DiseaseCard
-                    title="Early Blight"
-                    description="Early blight appears later in the season and affects older leaves first."
-                    symptoms={[
-                        "Circular brown spots with rings",
-                        "Yellowing of leaves",
-                        "Premature leaf drop"
-                    ]}
-                    treatment={[
-                        "Rotate crops annually",
-                        "Apply organic fungicides",
-                        "Maintain plant nutrition"
-                    ]}
-                />
-
-                {/* Tomato Section */}
-                <SectionTitle emoji="🍅" title="Tomato Plant Diseases" />
-
-                <DiseaseCard
-                    title="Bacterial Spot"
-                    description="A common tomato disease that spreads rapidly in humid conditions."
-                    symptoms={[
-                        "Small dark brown spots",
-                        "Yellow halos on leaves",
-                        "Leaf drop"
-                    ]}
-                    treatment={[
-                        "Use disease-free seeds",
-                        "Apply copper bactericides",
-                        "Avoid overhead irrigation"
-                    ]}
-                />
-
-                <DiseaseCard
-                    title="Septoria Leaf Spot"
-                    description="One of the most common tomato diseases worldwide."
-                    symptoms={[
-                        "Circular spots with dark borders",
-                        "Tiny black dots in centers",
-                        "Progressive yellowing"
-                    ]}
-                    treatment={[
-                        "Remove infected leaves",
-                        "Mulch to prevent splash",
-                        "Apply organic fungicides"
-                    ]}
-                />
-
-                {/* Green Tips Section */}
-                <div className="bg-green-600 text-white rounded-2xl p-10 mt-16">
-                    <h2 className="text-2xl font-semibold mb-8 text-center">
-                        General Care Tips for Healthy Plants
-                    </h2>
-
-                    <div className="grid md:grid-cols-3 gap-8 text-center">
-                        <TipCard
-                            title="Proper Watering"
-                            text="Water deeply but infrequently. Aim for 1-2 inches per week."
-                        />
-                        <TipCard
-                            title="Sunlight & Spacing"
-                            text="Ensure 6-8 hours of direct sunlight daily."
-                        />
-                        <TipCard
-                            title="Pest Management"
-                            text="Monitor regularly and use organic treatments."
+                <FadeIn delay={0.2}>
+                    <div className="relative w-full h-[300px] md:h-[450px] mb-12 rounded-2xl overflow-hidden shadow-lg">
+                        <Image
+                            src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6"
+                            alt="Lush green farm field showing healthy crops under sunlight"
+                            fill
+                            style={{ objectFit: 'cover' }}
+                            unoptimized
                         />
                     </div>
-                </div>
+                </FadeIn>
+
+                {/* Why It Matters */}
+                <FadeIn delay={0.3}>
+                    <section className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 md:p-10 shadow-sm border border-gray-100 mb-16">
+                        <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">
+                            Why Plant Health Matters
+                        </h2>
+                        <p className="text-gray-700 mb-4 leading-relaxed text-lg">
+                            Potato and tomato plants are among the most popular crops for home gardeners and commercial farmers alike. However, they&apos;re also susceptible to various diseases that can devastate your harvest if not detected early.
+                        </p>
+                        <p className="text-gray-700 leading-relaxed text-lg">
+                            With the advancement of AI technology, detecting plant diseases has become faster and more accessible than ever, allowing you to take immediate action and save your crops.
+                        </p>
+                    </section>
+                </FadeIn>
+
+                {/* Potato Section */}
+                <section aria-labelledby="potato-diseases">
+                    <FadeIn>
+                        <SectionTitle emoji="🥔" title="Potato Plant Diseases" id="potato-diseases" />
+                    </FadeIn>
+
+                    <FadeIn delay={0.1}>
+                        <DiseaseCard
+                            title="Late Blight"
+                            description="Late blight is one of the most destructive diseases affecting potato plants."
+                            symptoms={[
+                                "Dark brown or black spots on leaves",
+                                "White fungal growth on undersides",
+                                "Rapid wilting and decay"
+                            ]}
+                            treatment={[
+                                "Apply copper-based fungicides",
+                                "Remove infected material",
+                                "Improve air circulation"
+                            ]}
+                        />
+                    </FadeIn>
+
+                    <FadeIn delay={0.2}>
+                        <DiseaseCard
+                            title="Early Blight"
+                            description="Early blight appears later in the season and affects older leaves first."
+                            symptoms={[
+                                "Circular brown spots with rings",
+                                "Yellowing of leaves",
+                                "Premature leaf drop"
+                            ]}
+                            treatment={[
+                                "Rotate crops annually",
+                                "Apply organic fungicides",
+                                "Maintain plant nutrition"
+                            ]}
+                        />
+                    </FadeIn>
+                </section>
+
+                {/* Tomato Section */}
+                <section aria-labelledby="tomato-diseases" className="mt-16">
+                    <FadeIn>
+                        <SectionTitle emoji="🍅" title="Tomato Plant Diseases" id="tomato-diseases" />
+                    </FadeIn>
+
+                    <FadeIn delay={0.1}>
+                        <DiseaseCard
+                            title="Bacterial Spot"
+                            description="A common tomato disease that spreads rapidly in humid conditions."
+                            symptoms={[
+                                "Small dark brown spots",
+                                "Yellow halos on leaves",
+                                "Leaf drop"
+                            ]}
+                            treatment={[
+                                "Use disease-free seeds",
+                                "Apply copper bactericides",
+                                "Avoid overhead irrigation"
+                            ]}
+                        />
+                    </FadeIn>
+
+                    <FadeIn delay={0.2}>
+                        <DiseaseCard
+                            title="Septoria Leaf Spot"
+                            description="One of the most common tomato diseases worldwide."
+                            symptoms={[
+                                "Circular spots with dark borders",
+                                "Tiny black dots in centers",
+                                "Progressive yellowing"
+                            ]}
+                            treatment={[
+                                "Remove infected leaves",
+                                "Mulch to prevent splash",
+                                "Apply organic fungicides"
+                            ]}
+                        />
+                    </FadeIn>
+                </section>
+
+                {/* Green Tips Section */}
+                <FadeIn delay={0.3}>
+                    <section className="bg-green-700 text-white rounded-3xl p-10 md:p-12 mt-20 shadow-xl overflow-hidden relative">
+                        {/* Decorative background element */}
+                        <div className="absolute top-0 right-0 -mr-16 -mt-16 opacity-10 pointer-events-none" aria-hidden="true">
+                            <Leaf size={250} />
+                        </div>
+                        
+                        <div className="relative z-10">
+                            <h2 className="text-3xl font-bold mb-10 text-center tracking-tight">
+                                General Care Tips for Healthy Plants
+                            </h2>
+
+                            <div className="grid md:grid-cols-3 gap-8 text-center">
+                                <TipCard
+                                    title="Proper Watering"
+                                    text="Water deeply but infrequently. Aim for 1-2 inches per week at the base."
+                                />
+                                <TipCard
+                                    title="Sunlight & Spacing"
+                                    text="Ensure 6-8 hours of direct sunlight daily with adequate airflow."
+                                />
+                                <TipCard
+                                    title="Pest Management"
+                                    text="Monitor regularly, encourage beneficial insects, and use organic treatments."
+                                />
+                            </div>
+                        </div>
+                    </section>
+                </FadeIn>
 
                 {/* CTA */}
-                <div className="bg-white border-2 border-green-600 rounded-2xl p-10 text-center mt-12">
-                    <h2 className="text-2xl font-semibold mb-4">
-                        Try Our Plant Health Detector
-                    </h2>
-                    <p className="text-gray-600 mb-6">
-                        Use our AI-powered tool to instantly detect diseases.
-                    </p>
-                    <Link href="/scan">
-                        <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition">
-                            Start Scanning Now →
-                        </button>
-                    </Link>
-                </div>
+                <FadeIn delay={0.4}>
+                    <section className="bg-white border-2 border-green-600 rounded-3xl p-10 md:p-12 text-center mt-16 shadow-lg">
+                        <h2 className="text-3xl font-bold mb-4 text-gray-900 tracking-tight">
+                            Try Our Plant Health Detector
+                        </h2>
+                        <p className="text-gray-600 mb-8 text-lg">
+                            Use our AI-powered tool to instantly detect diseases and get actionable care plans.
+                        </p>
+                        <Link href="/scan" tabIndex={-1}>
+                            <button className="bg-green-600 hover:bg-green-700 text-white font-bold text-lg px-8 py-4 rounded-xl transition-all shadow-md hover:shadow-lg hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-green-500 focus-visible:ring-offset-2">
+                                Start Scanning Now →
+                            </button>
+                        </Link>
+                    </section>
+                </FadeIn>
 
-            </div>
-        </div>
-    );
-}
-
-/* ---------- Reusable Components ---------- */
-
-function SectionTitle({ emoji, title }) {
-    return (
-        <div className="flex items-center gap-3 mt-12 mb-6">
-            <span className="text-3xl">{emoji}</span>
-            <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-        </div>
-    );
-}
-
-function DiseaseCard({ title, description, symptoms, treatment }) {
-    return (
-        <div className="bg-white rounded-2xl p-8 shadow-sm mb-8">
-            <div className="flex items-center gap-2 mb-4">
-                <AlertTriangle className="text-orange-500" size={20} />
-                <h3 className="text-xl font-semibold">{title}</h3>
-            </div>
-
-            <p className="text-gray-700 mb-6">{description}</p>
-
-            <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                    <h4 className="font-semibold mb-2">Symptoms:</h4>
-                    <ul className="list-disc pl-5 text-gray-700">
-                        {symptoms.map((item, index) => (
-                            <li key={index}>{item}</li>
-                        ))}
-                    </ul>
-                </div>
-
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                    <h4 className="font-semibold mb-2">Treatment:</h4>
-                    <ul className="list-disc pl-5 text-gray-700">
-                        {treatment.map((item, index) => (
-                            <li key={index}>{item}</li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function TipCard({ title, text }) {
-    return (
-        <div>
-            <h3 className="font-semibold text-lg mb-2">{title}</h3>
-            <p className="text-green-100">{text}</p>
-        </div>
+            </article>
+        </main>
     );
 }

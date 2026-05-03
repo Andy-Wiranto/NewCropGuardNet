@@ -1,321 +1,140 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import Link from "next/link";
 import { Leaf, Camera, CheckCircle, Loader2, AlertCircle } from "lucide-react";
-import { loadModel, predict } from "@/lib/modelUtils";
+import { motion } from "framer-motion";
+import usePlantScanner from "@/hooks/usePlantScanner";
+import ImageDropzone from "@/components/features/scan/ImageDropzone";
+import ScanResult from "@/components/features/scan/ScanResult";
+import FeatureCard from "@/components/shared/FeatureCard";
+import FadeIn from "@/components/shared/FadeIn";
+import Navbar from "@/components/Navbar";
 
 export default function ScanPlant() {
-    const fileInputRef = useRef(null);
-    const imgRef = useRef(null);
-    const [preview, setPreview] = useState(null);
-    const [selectedPlant, setSelectedPlant] = useState(null);
-
-    // Model & scanning states
-    const [modelReady, setModelReady] = useState(false);
-    const [modelError, setModelError] = useState(null);
-    const [isScanning, setIsScanning] = useState(false);
-    const [result, setResult] = useState(null);
-    const [scanError, setScanError] = useState(null);
-
-    // Load model on page open (eager loading)
-    useEffect(() => {
-        loadModel()
-            .then(() => {
-                setModelReady(true);
-                console.log("Model is ready for inference");
-            })
-            .catch((err) => {
-                console.error("Failed to load model:", err);
-                setModelError("Failed to load AI model. Please refresh the page.");
-            });
-    }, []);
-
-    const handleButtonClick = (plant) => {
-        setSelectedPlant(plant);
-        setResult(null);
-        setScanError(null);
-        fileInputRef.current.click();
-    };
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setPreview(URL.createObjectURL(file));
-            setResult(null);
-            setScanError(null);
-        }
-    };
-
-    const handleScan = async () => {
-        if (!imgRef.current) return;
-
-        setIsScanning(true);
-        setScanError(null);
-        setResult(null);
-
-        try {
-            const prediction = await predict(imgRef.current);
-            setResult(prediction);
-        } catch (err) {
-            console.error("Scan failed:", err);
-            setScanError("Analysis failed. Please try again with a different image.");
-        } finally {
-            setIsScanning(false);
-        }
-    };
-
-    // Determine result accent color
-    const isHealthy = result?.rawLabel?.toLowerCase().includes("healthy");
-    const resultAccent = isHealthy ? "green" : "red";
+    const {
+        fileInputRef,
+        imgRef,
+        preview,
+        isDragging,
+        modelReady,
+        modelError,
+        isScanning,
+        result,
+        scanError,
+        handleDragOver,
+        handleDragLeave,
+        handleDrop,
+        handleFileChange,
+        handleScan,
+        triggerFileInput
+    } = usePlantScanner();
 
     return (
-        <div className="min-h-screen bg-[#c7d8cf]" >
-            {/* Navbar */}
-            <nav className="bg-white shadow-sm py-4 px-6 flex justify-between items-center" >
-                <Link href="/">
-                    <div className="flex items-center gap-2">
-                        <Leaf className="text-green-600" />
-                        <span className="font-semibold text-gray-800">PlantHealth</span>
+        <main className="min-h-screen bg-[#c7d8cf]" >
+            <Navbar />
+
+            <div className="flex flex-col items-center px-4 py-12 md:py-16">
+                <FadeIn className="flex flex-col items-center w-full">
+                    {/* Logo */}
+                    <div className="bg-green-600 w-16 h-16 rounded-full flex items-center justify-center mb-6 shadow-md" aria-hidden="true">
+                        <Leaf className="text-white" size={28} />
                     </div>
-                </Link>
-                <Link href="/" className="text-gray-600 hover:text-green-600">
-                    Home
-                </Link>
-            </nav>
-            <div className="min-h-screen bg-[#c7d8cf] flex flex-col items-center px-4 py-10">
 
-                {/* Logo */}
-                <div className="bg-green-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                    <Leaf className="text-white" size={28} />
-                </div>
-
-                {/* Title */}
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 text-center">
-                    Plant Health Detector
-                </h1>
-                <p className="text-gray-600 mt-2 text-center">
-                    Select a plant category to begin analysis
-                </p>
+                    {/* Title */}
+                    <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 text-center tracking-tight">
+                        Plant Health Detector
+                    </h1>
+                    <p className="text-gray-700 text-lg mt-4 text-center max-w-xl">
+                        Upload, drag-and-drop, or paste an image (Ctrl+V) to begin analysis
+                    </p>
+                </FadeIn>
 
                 {/* Model loading status */}
                 {!modelReady && !modelError && (
-                    <div className="flex items-center gap-2 mt-4 text-sm text-gray-500">
-                        <Loader2 className="animate-spin" size={16} />
-                        <span>Loading AI model...</span>
-                    </div>
+                    <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-2 mt-6 text-sm font-medium text-gray-600 bg-white/50 px-5 py-2.5 rounded-full shadow-sm border border-white"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        <Loader2 className="animate-spin text-green-600" size={18} aria-hidden="true" />
+                        <span>Initializing AI engine...</span>
+                    </motion.div>
                 )}
+                
                 {modelError && (
-                    <div className="flex items-center gap-2 mt-4 text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg">
-                        <AlertCircle size={16} />
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="flex items-center gap-2 mt-6 text-sm font-medium text-red-700 bg-red-100 px-5 py-3 rounded-xl shadow-sm border border-red-200"
+                        role="alert"
+                    >
+                        <AlertCircle size={18} aria-hidden="true" />
                         <span>{modelError}</span>
-                    </div>
+                    </motion.div>
                 )}
 
                 {/* Main Card */}
-                <div className="bg-gray-100 rounded-2xl shadow-md p-8 mt-10 w-full max-w-4xl">
-
-                    <h2 className="text-xl font-semibold text-center mb-8">
-                        Choose Plant Type
-                    </h2>
-
-                    <div className="grid md:grid-cols-2 gap-6">
-
-                        {/* Potato Card */}
-                        <div className="border-2 border-yellow-400 rounded-xl p-8 bg-yellow-50 flex flex-col items-center text-center">
-                            <div className="text-5xl mb-4">🥔</div>
-                            <h3 className="text-xl font-semibold mb-2">Potato</h3>
-                            <p className="text-gray-600 mb-6">
-                                Detect potato diseases and leaf issues
-                            </p>
-                            <button
-                                onClick={() => handleButtonClick("potato")}
-                                className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg transition"
-                            >
-                                Select Potato
-                            </button>
-
-                        </div>
-
-                        {/* Tomato Card */}
-                        <div className="border-2 border-red-300 rounded-xl p-8 bg-red-50 flex flex-col items-center text-center">
-                            <div className="text-5xl mb-4">🍅</div>
-                            <h3 className="text-xl font-semibold mb-2">Tomato</h3>
-                            <p className="text-gray-600 mb-6">
-                                Identify tomato plant health issues
-                            </p>
-
-                            <button
-                                onClick={() => handleButtonClick("tomato")}
-                                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition"
-                            >
-                                Select Tomato
-                            </button>
-                        </div>
-
-                        <input
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            ref={fileInputRef}
-                            onChange={handleFileChange}
-                            className="hidden"
+                <FadeIn delay={0.2} className="w-full max-w-4xl mt-10">
+                    <section className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-white p-6 md:p-10 w-full" aria-label="Upload Section">
+                        
+                        <ImageDropzone 
+                            preview={preview}
+                            isDragging={isDragging}
+                            modelReady={modelReady}
+                            isScanning={isScanning}
+                            imgRef={imgRef}
+                            fileInputRef={fileInputRef}
+                            handleDragOver={handleDragOver}
+                            handleDragLeave={handleDragLeave}
+                            handleDrop={handleDrop}
+                            handleFileChange={handleFileChange}
+                            handleScan={handleScan}
+                            triggerFileInput={triggerFileInput}
+                            hasResult={!!result}
                         />
-                    </div>
 
-                    {/* Image Preview */}
-                    {preview && (
-                        <div className="mt-8 flex flex-col items-center">
-                            <p className="text-sm text-gray-500 mb-2">
-                                Uploaded image for <span className="font-semibold capitalize">{selectedPlant}</span>
-                            </p>
-                            <img
-                                ref={imgRef}
-                                src={preview}
-                                alt="Uploaded plant"
-                                crossOrigin="anonymous"
-                                className="rounded-xl shadow-md max-h-80 object-contain"
+                        {/* Scan Error */}
+                        {scanError && (
+                            <motion.div 
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-6 flex items-center justify-center gap-2 text-red-700 bg-red-50 border border-red-200 px-5 py-4 rounded-xl font-medium"
+                                role="alert"
+                            >
+                                <AlertCircle size={20} aria-hidden="true" />
+                                <span>{scanError}</span>
+                            </motion.div>
+                        )}
+
+                        {/* Detection Result */}
+                        <ScanResult 
+                            result={result} 
+                            isScanning={isScanning} 
+                            triggerFileInput={triggerFileInput} 
+                        />
+
+                        {/* Features Section */}
+                        <div className="grid md:grid-cols-3 gap-6 mt-16 pt-10 border-t border-gray-100">
+                            <FeatureCard
+                                icon={<Camera size={28} aria-hidden="true" />}
+                                title="Take a Photo"
+                                text="Use your device camera for instant, on-the-spot analysis."
                             />
-                            <button
-                                onClick={() => {
-                                    fileInputRef.current.click();
-                                }}
-                                className="mt-4 text-sm text-green-600 hover:text-green-800 underline"
-                            >
-                                Upload a different photo
-                            </button>
-                            <button
-                                onClick={handleScan}
-                                disabled={isScanning || !modelReady}
-                                className={`mt-4 font-semibold px-8 py-3 rounded-lg transition flex items-center gap-2
-                                    ${isScanning || !modelReady
-                                        ? "bg-gray-400 cursor-not-allowed text-gray-200"
-                                        : "bg-green-600 hover:bg-green-700 text-white"
-                                    }`}
-                            >
-                                {isScanning ? (
-                                    <>
-                                        <Loader2 className="animate-spin" size={18} />
-                                        Analyzing...
-                                    </>
-                                ) : !modelReady ? (
-                                    <>
-                                        <Loader2 className="animate-spin" size={18} />
-                                        Model Loading...
-                                    </>
-                                ) : (
-                                    "Scan Now"
-                                )}
-                            </button>
+                            <FeatureCard
+                                icon={<Leaf size={28} aria-hidden="true" />}
+                                title="AI Analysis"
+                                text="Advanced edge-AI detection of 13+ plant health conditions."
+                            />
+                            <FeatureCard
+                                icon={<CheckCircle size={28} aria-hidden="true" />}
+                                title="Get Advice"
+                                text="Receive personalized, expert-curated care recommendations."
+                            />
                         </div>
-                    )}
-
-                    {/* Scan Error */}
-                    {scanError && (
-                        <div className="mt-6 flex items-center justify-center gap-2 text-red-600 bg-red-50 px-4 py-3 rounded-lg">
-                            <AlertCircle size={18} />
-                            <span>{scanError}</span>
-                        </div>
-                    )}
-
-                    {/* Detection Result */}
-                    {result && (
-                        <div className={`mt-8 mx-auto max-w-md border-2 rounded-2xl p-6 shadow-sm
-                            ${isHealthy
-                                ? "border-green-300 bg-green-50"
-                                : "border-red-300 bg-red-50"
-                            }`}
-                        >
-                            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4">
-                                🔬 Detection Result
-                            </h3>
-
-                            {/* Disease Name */}
-                            <div className="mb-4">
-                                <p className="text-sm text-gray-500 mb-1">Detected Condition</p>
-                                <p className={`text-2xl font-bold ${isHealthy ? "text-green-700" : "text-red-700"}`}>
-                                    {result.label}
-                                </p>
-                            </div>
-
-                            {/* Confidence Bar */}
-                            <div className="mb-4">
-                                <div className="flex justify-between items-center mb-1">
-                                    <p className="text-sm text-gray-500">Confidence</p>
-                                    <p className={`text-sm font-semibold ${isHealthy ? "text-green-700" : "text-red-700"}`}>
-                                        {(result.confidence * 100).toFixed(2)}%
-                                    </p>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                                    <div
-                                        className={`h-3 rounded-full transition-all duration-700 ease-out ${isHealthy ? "bg-green-500" : "bg-red-500"}`}
-                                        style={{ width: `${(result.confidence * 100).toFixed(1)}%` }}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Status badge */}
-                            <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium
-                                ${isHealthy
-                                    ? "bg-green-200 text-green-800"
-                                    : "bg-red-200 text-red-800"
-                                }`}
-                            >
-                                {isHealthy ? (
-                                    <><CheckCircle size={14} /> Plant is Healthy</>
-                                ) : (
-                                    <><AlertCircle size={14} /> Disease Detected</>
-                                )}
-                            </div>
-
-                            {/* Scan Again */}
-                            <button
-                                onClick={handleScan}
-                                disabled={isScanning}
-                                className="mt-4 block w-full text-center text-sm text-gray-600 hover:text-gray-800 underline"
-                            >
-                                Scan Again
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Features Section */}
-                    <div className="grid md:grid-cols-3 gap-6 mt-12 pt-8 border-t border-gray-200">
-                        <FeatureCard
-                            icon={<Camera size={24} />}
-                            title="Take a Photo"
-                            text="Use your device camera for instant analysis"
-                        />
-
-                        <FeatureCard
-                            icon={<Leaf size={24} />}
-                            title="AI Analysis"
-                            text="Advanced detection of plant health issues"
-                        />
-
-                        <FeatureCard
-                            icon={<CheckCircle size={24} />}
-                            title="Get Advice"
-                            text="Receive personalized care recommendations"
-                        />
-                    </div>
-                </div>
+                    </section>
+                </FadeIn>
             </div>
-        </div>
-    );
-}
-
-
-/* ---------- Feature Card ---------- */
-
-function FeatureCard({ icon, title, text }) {
-    return (
-        <div className="bg-gray-100 rounded-xl p-6 shadow-sm text-center">
-            <div className="text-green-600 mb-3 flex justify-center">
-                {icon}
-            </div>
-            <h3 className="font-semibold text-lg mb-2">{title}</h3>
-            <p className="text-gray-600 text-sm">{text}</p>
-        </div>
+        </main>
     );
 }
