@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
@@ -13,7 +13,12 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+if (!firebaseConfig.apiKey) {
+  console.error("FIREBASE ERROR: Firebase API key is missing. If you are building on Netlify, make sure you have added all NEXT_PUBLIC_FIREBASE_* variables in the Netlify Environment Variables dashboard.");
+}
+
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
 
 // Initialize Auth
 export const auth = getAuth(app);
