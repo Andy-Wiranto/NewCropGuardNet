@@ -2,5 +2,8 @@
   command = "npm run build"
   publish = ".next"
 
+[build.environment]
+  NODE_VERSION = "24"
+
 # The Next.js plugin is automatically installed by Netlify,
 # but it's good practice to ensure standard configurations are met.
