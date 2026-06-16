@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { CheckCircle, AlertCircle, Leaf, Camera } from "lucide-react";
 import { DISEASE_SOLUTIONS } from "@/utils/diseaseSolutions";
 
-export default function ScanResult({ result, isScanning, triggerFileInput }) {
+export default function ScanResult({ result, isScanning, resetScanner }) {
     if (!result) return null;
 
     const isHealthy = result.rawLabel?.toLowerCase().includes("healthy");
@@ -93,7 +93,7 @@ export default function ScanResult({ result, isScanning, triggerFileInput }) {
                     <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={triggerFileInput}
+                        onClick={resetScanner}
                         disabled={isScanning}
                         className="inline-flex items-center gap-2 text-gray-600 hover:text-green-600 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:outline-none rounded-lg px-4 py-2"
                         aria-label="Scan another plant image"

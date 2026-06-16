@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { UploadCloud, FileImage, Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { UploadCloud, FileImage, Loader2, Camera, RefreshCcw, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function ImageDropzone({
@@ -15,12 +16,81 @@ export default function ImageDropzone({
     handleFileChange,
     handleScan,
     triggerFileInput,
-    hasResult
+    hasResult,
+    isCameraActive,
+    stream,
+    startCamera,
+    stopCamera,
+    switchCamera,
+    takePhoto,
+    videoRef,
+    canvasRef
 }) {
     return (
         <div className="w-full">
             <AnimatePresence mode="wait">
-                {!preview ? (
+                {isCameraActive ? (
+                    <motion.div
+                        key="camera"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="relative rounded-2xl overflow-hidden bg-black flex flex-col items-center justify-center min-h-[300px] md:min-h-[400px]"
+                    >
+                        <video 
+                            ref={(el) => {
+                                videoRef.current = el;
+                                if (el && stream && el.srcObject !== stream) {
+                                    el.srcObject = stream;
+                                    el.play().catch(err => console.error("Error auto-playing video:", err));
+                                }
+                            }} 
+                            autoPlay 
+                            playsInline
+                            muted 
+                            className="w-full h-full object-cover max-h-[60vh]"
+                            onLoadedMetadata={(e) => {
+                                // Ensure it plays once metadata is loaded as a fallback
+                                e.target.play().catch(err => console.error(err));
+                            }}
+                        />
+                        <canvas ref={canvasRef} className="hidden" />
+                        
+                        {/* Camera Controls Overlay */}
+                        <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/80 to-transparent flex justify-center items-center gap-6">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    switchCamera();
+                                }}
+                                className="p-3 rounded-full bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                                aria-label="Switch Camera"
+                            >
+                                <RefreshCcw size={24} />
+                            </button>
+                            
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    takePhoto();
+                                }}
+                                className="w-16 h-16 rounded-full border-4 border-white bg-white/50 hover:bg-white/80 transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                                aria-label="Take Photo"
+                            />
+                            
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    stopCamera();
+                                }}
+                                className="p-3 rounded-full bg-red-500/80 text-white hover:bg-red-600 backdrop-blur-sm transition-colors focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none"
+                                aria-label="Cancel Camera"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+                    </motion.div>
+                ) : !preview ? (
                     <motion.div 
                         key="dropzone"
                         initial={{ opacity: 0, scale: 0.95 }}
@@ -32,19 +102,10 @@ export default function ImageDropzone({
                         }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className="border-4 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center cursor-pointer hover:border-green-400 focus-visible:ring-4 focus-visible:ring-green-500 focus-visible:outline-none"
+                        className="border-4 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center hover:border-green-400 focus-visible:ring-4 focus-visible:ring-green-500 focus-visible:outline-none"
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                         onDrop={handleDrop}
-                        onClick={triggerFileInput}
-                        role="button"
-                        tabIndex={0}
-                        aria-label="Upload an image by dragging and dropping or clicking"
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                                triggerFileInput();
-                            }
-                        }}
                     >
                         <motion.div
                             animate={isDragging ? { y: -10, scale: 1.1 } : { y: 0, scale: 1 }}
@@ -56,13 +117,27 @@ export default function ImageDropzone({
                         <p className="text-gray-500 mb-6 max-w-sm">
                             Drag and drop a clear photo of the plant leaf, click to browse, or paste an image from your clipboard.
                         </p>
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-green-800 focus-visible:outline-none"
-                        >
-                            Select Image
-                        </motion.button>
+                        
+                        <div className="flex flex-wrap justify-center gap-4">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={triggerFileInput}
+                                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-green-800 focus-visible:outline-none flex items-center gap-2"
+                            >
+                                <FileImage size={18} />
+                                Select Image
+                            </motion.button>
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={startCamera}
+                                className="bg-white border-2 border-green-600 text-green-700 hover:bg-green-50 px-6 py-2 rounded-lg transition-colors shadow-sm focus-visible:ring-2 focus-visible:ring-green-800 focus-visible:outline-none flex items-center gap-2"
+                            >
+                                <Camera size={18} />
+                                Open Camera
+                            </motion.button>
+                        </div>
                     </motion.div>
                 ) : (
                     <motion.div 

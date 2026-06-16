@@ -26,8 +26,19 @@ export default function ScanPlant() {
         handleFileChange,
         handleScan,
         triggerFileInput,
+        resetScanner,
         isSaving,
-        saveSuccess
+        saveSuccess,
+        isCameraActive,
+        facingMode,
+        cameraError,
+        stream,
+        startCamera,
+        stopCamera,
+        switchCamera,
+        takePhoto,
+        videoRef,
+        canvasRef
     } = usePlantScanner();
 
     return (
@@ -94,6 +105,14 @@ export default function ScanPlant() {
                             handleScan={handleScan}
                             triggerFileInput={triggerFileInput}
                             hasResult={!!result}
+                            isCameraActive={isCameraActive}
+                            stream={stream}
+                            startCamera={startCamera}
+                            stopCamera={stopCamera}
+                            switchCamera={switchCamera}
+                            takePhoto={takePhoto}
+                            videoRef={videoRef}
+                            canvasRef={canvasRef}
                         />
 
                         {/* Scan Error */}
@@ -113,7 +132,7 @@ export default function ScanPlant() {
                         <ScanResult 
                             result={result} 
                             isScanning={isScanning} 
-                            triggerFileInput={triggerFileInput} 
+                            resetScanner={resetScanner} 
                         />
 
                         {/* Saving Indicator */}
