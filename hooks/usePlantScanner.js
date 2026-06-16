@@ -171,6 +171,9 @@ export default function usePlantScanner() {
         setScanError(null);
         setSaveSuccess(false);
         stopCamera();
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
     };
 
     // Camera functions
