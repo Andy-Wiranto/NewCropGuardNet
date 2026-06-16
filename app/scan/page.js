@@ -25,7 +25,9 @@ export default function ScanPlant() {
         handleDrop,
         handleFileChange,
         handleScan,
-        triggerFileInput
+        triggerFileInput,
+        isSaving,
+        saveSuccess
     } = usePlantScanner();
 
     return (
@@ -113,6 +115,28 @@ export default function ScanPlant() {
                             isScanning={isScanning} 
                             triggerFileInput={triggerFileInput} 
                         />
+
+                        {/* Saving Indicator */}
+                        {isSaving && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500"
+                            >
+                                <Loader2 className="animate-spin" size={16} />
+                                <span>Saving to history...</span>
+                            </motion.div>
+                        )}
+                        {saveSuccess && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-4 flex items-center justify-center gap-2 text-sm text-green-600 font-medium"
+                            >
+                                <CheckCircle size={16} />
+                                <span>Saved to your history</span>
+                            </motion.div>
+                        )}
 
                         {/* Features Section */}
                         <div className="grid md:grid-cols-3 gap-6 mt-16 pt-10 border-t border-gray-100">

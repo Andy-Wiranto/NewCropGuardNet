@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 import { useState, useEffect, useRef } from "react";
 import { loadModel, predict } from "@/services/mlService";
+import { useAuth } from "@/contexts/AuthContext";
+import { historyService } from "@/services/historyService";
 
 /**
  * Custom hook to manage the state and logic for the plant scanning feature.
@@ -12,7 +14,11 @@ export default function usePlantScanner() {
     const fileInputRef = useRef(null);
     const imgRef = useRef(null);
     const [preview, setPreview] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
     const [isDragging, setIsDragging] = useState(false);
+
+    // Auth context to check if user is logged in
+    const { user } = useAuth();
 
     // Model & scanning states
     const [modelReady, setModelReady] = useState(false);
@@ -20,6 +26,8 @@ export default function usePlantScanner() {
     const [isScanning, setIsScanning] = useState(false);
     const [result, setResult] = useState(null);
     const [scanError, setScanError] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
 
     // Load model on page open (eager loading)
     useEffect(() => {
@@ -60,8 +68,10 @@ export default function usePlantScanner() {
                     const file = items[i].getAsFile();
                     if (validateFile(file)) {
                         setPreview(URL.createObjectURL(file));
+                        setSelectedFile(file);
                         setResult(null);
                         setScanError(null);
+                        setSaveSuccess(false);
                     }
                     break;
                 }
@@ -89,8 +99,10 @@ export default function usePlantScanner() {
         const file = e.dataTransfer.files[0];
         if (validateFile(file)) {
             setPreview(URL.createObjectURL(file));
+            setSelectedFile(file);
             setResult(null);
             setScanError(null);
+            setSaveSuccess(false);
         }
     };
 
@@ -98,8 +110,10 @@ export default function usePlantScanner() {
         const file = e.target.files[0];
         if (validateFile(file)) {
             setPreview(URL.createObjectURL(file));
+            setSelectedFile(file);
             setResult(null);
             setScanError(null);
+            setSaveSuccess(false);
         }
     };
 
@@ -109,10 +123,27 @@ export default function usePlantScanner() {
         setIsScanning(true);
         setScanError(null);
         setResult(null);
+        setSaveSuccess(false);
 
         try {
             const prediction = await predict(imgRef.current);
             setResult(prediction);
+
+            // Automatically save to history if user is logged in
+            if (user && selectedFile) {
+                setIsSaving(true);
+                try {
+                    await historyService.saveScan(user.uid, selectedFile, prediction);
+                    setSaveSuccess(true);
+                } catch (saveErr) {
+                    console.error("Failed to save scan to history:", saveErr);
+                    if (saveErr.message === "PERMISSION_DENIED") {
+                        setScanError("Save failed: Firebase Security Rules block access. Please update rules in Firebase Console.");
+                    }
+                } finally {
+                    setIsSaving(false);
+                }
+            }
         } catch (err) {
             console.error("Scan failed:", err);
             setScanError("Analysis failed. Please try again with a different image.");
@@ -135,6 +166,8 @@ export default function usePlantScanner() {
         isScanning,
         result,
         scanError,
+        isSaving,
+        saveSuccess,
         handleDragOver,
         handleDragLeave,
         handleDrop,

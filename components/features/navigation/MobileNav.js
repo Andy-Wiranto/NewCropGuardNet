@@ -23,6 +23,16 @@ export default function MobileNav({ mobileMenuOpen, setMobileMenuOpen, user, loa
                         >
                             Learn More
                         </Link>
+
+                        {user && (
+                            <Link
+                                href="/history"
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="text-gray-700 hover:text-green-600 font-medium py-3 px-3 rounded-xl hover:bg-green-50 transition-all"
+                            >
+                                History
+                            </Link>
+                        )}
                         <Link
                             href="/scan"
                             onClick={() => setMobileMenuOpen(false)}

@@ -1,5 +1,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -20,8 +22,10 @@ if (firebaseConfig.apiKey === "missing-api-key") {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 
-// Initialize Auth
+// Initialize Auth, Firestore, and Storage
 export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 // Initialize Analytics (conditionally for SSR compatibility)
 let analytics;

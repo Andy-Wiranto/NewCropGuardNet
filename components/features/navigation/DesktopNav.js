@@ -14,6 +14,15 @@ export default function DesktopNav({ user, loading, displayName, handleLogout })
                 Learn More
             </Link>
 
+            {user && (
+                <Link
+                    href="/history"
+                    className="text-gray-600 hover:text-green-600 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500 rounded-md px-2 py-1"
+                >
+                    History
+                </Link>
+            )}
+
             <div className="flex items-center gap-4">
                 <Link href="/scan" tabIndex={-1}>
                     <motion.button

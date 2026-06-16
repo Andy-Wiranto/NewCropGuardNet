@@ -4,7 +4,9 @@ import {
     updateProfile, 
     GoogleAuthProvider, 
     signInWithPopup, 
-    signOut 
+    signOut,
+    sendPasswordResetEmail,
+    confirmPasswordReset
 } from "firebase/auth";
 import { auth } from "@/config/firebase";
 
@@ -53,6 +55,33 @@ class AuthService {
      */
     async logout() {
         return await signOut(auth);
+    }
+
+    /**
+     * Sends a password reset email to the given email address.
+     * Uses actionCodeSettings so the reset link redirects back to the app.
+     * @param {string} email 
+     * @returns {Promise<void>}
+     */
+    async sendPasswordReset(email) {
+        const actionCodeSettings = {
+            // Firebase will append oobCode as a query parameter to this URL
+            url: typeof window !== "undefined" 
+                ? `${window.location.origin}/signin` 
+                : "http://localhost:3000/signin",
+            handleCodeInApp: false,
+        };
+        return await sendPasswordResetEmail(auth, email, actionCodeSettings);
+    }
+
+    /**
+     * Confirms a password reset with the code from the email link.
+     * @param {string} code 
+     * @param {string} newPassword 
+     * @returns {Promise<void>}
+     */
+    async confirmPasswordResetWithCode(code, newPassword) {
+        return await confirmPasswordReset(auth, code, newPassword);
     }
 }
 

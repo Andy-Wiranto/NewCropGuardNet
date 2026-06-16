@@ -43,7 +43,7 @@ export default function SignInForm() {
                 <div>
                     <div className="flex justify-between items-center mb-1.5">
                         <label className="block text-sm font-medium text-gray-700">Password</label>
-                        <a href="#" className="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">Forgot password?</a>
+                        <Link href="/forgot-password" className="text-sm font-medium text-green-600 hover:text-green-500 transition-colors">Forgot password?</Link>
                     </div>
                     <input
                         type="password"
